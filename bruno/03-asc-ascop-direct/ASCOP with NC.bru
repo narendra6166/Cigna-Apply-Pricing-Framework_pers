@@ -1,0 +1,169 @@
+meta {
+  name: ASCOP with NC
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "ASCOP with RNC-202628002250004_0222628050004",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "923096775",
+      "subscriberPid": "136384064841980",
+      "patientPid": "243244064841980",
+      "cedRelationship": "E",
+      "patientSuffix": "03",
+      "patientDob": "20021207"
+    },
+    "planInformation": {
+      "soc": "44153",
+      "clientId": "9508757",
+      "accountNumber": "2310210",
+      "branch": "0001",
+      "benopt": "QDFCN"
+    },
+    "providers": {
+      "providerTin": "202308082",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "9060666",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "9060666",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "IM",
+      "renderingProviderType": "68",
+      "network": "INN",
+      "zipCode": "800161574",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202628002250004_0222628050004",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "A000",
+        "formType": "HCFA",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "",
+          "groupMethod": "10",
+          "pricerType": "S",
+          "pricingStatus": 200,
+          "allowedCharges": 1888.0,
+          "allowedExcessCharges": "",
+          "savings": 0,
+          "ppoDiscReason": 0,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": ""
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "PERCENT,DISCOUNT"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 8888,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "70010",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 888.0,
+          "diagnosisCode": "A000",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 1000.0,
+            "clExcluded": "false",
+            "override": "N",
+            "pdGroupCharge": 888,
+            "pdMaxUnits": 0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "CO300",
+            "claimEngineNetworkId": "9001017",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "6",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20260301",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20191001",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  Real OTROP GFRD doc 202628002250004_0222628050004 (QDFCN / CO300 / case-rate).
+  Captured ASCOP with NC.docx. Payload is actually pricerType S + 8888.
+  Prior DEV: notCovered 101.60, RNC 1620, claimLevelGroupMethod MS.
+}

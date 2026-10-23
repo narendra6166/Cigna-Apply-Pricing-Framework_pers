@@ -1,0 +1,325 @@
+meta {
+  name: AP-017 Line-Denied-015 zero allowed
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202015594390009_9432015590009",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "975005494",
+      "subscriberPid": "889513876781034",
+      "patientPid": "889513876781034",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19710222",
+      "memberNetwork": "OA128"
+    },
+    "planInformation": {
+      "soc": "42427",
+      "clientId": "9506171",
+      "accountNumber": "1710028",
+      "branch": "0001",
+      "benopt": "MOIN2",
+      "planSchedule": "APCOP"
+    },
+    "providers": {
+      "providerTin": "201720966",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "7851054",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "7851054",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "AAM",
+      "renderingProviderType": "40",
+      "network": "INN",
+      "zipCode": "634680000",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202015594390009_9432015590009",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "J342",
+        "formType": "U",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "20",
+          "groupMethod": "02",
+          "pricerType": "I",
+          "pricingStatus": 200,
+          "allowedCharges": 0.0,
+          "allowedExcessCharges": "",
+          "savings": 0,
+          "ppoDiscReason": 0,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "SI-N"
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "LN-DENIED-015"
+                },
+                {
+                  "pdRateTypeCode": "P10"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            },
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "SI-N"
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "LN-DENIED-015"
+                },
+                {
+                  "pdRateTypeCode": "P10"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 2,
+              "pdOriginalLineNum": 2
+            },
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "SI-N"
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "LN-DENIED-015"
+                },
+                {
+                  "pdRateTypeCode": "P10"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 3,
+              "pdOriginalLineNum": 3
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "30140",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00490",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 1300.0,
+          "diagnosisCode": "J342",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "SI-N",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 1300.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "MO130",
+            "claimEngineNetworkId": "0",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "7",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        },
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "30140",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00490",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 1400.0,
+          "diagnosisCode": "J342",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "13",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0002",
+          "pricingArea": {
+            "pdLineNum": 2,
+            "pdPtr": 2,
+            "pdRatesheetID": "SI-N",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 1400.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "MO130",
+            "claimEngineNetworkId": "0",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "7",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        },
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "30520",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00490",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 2300.0,
+          "diagnosisCode": "J342",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "13",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0003",
+          "pricingArea": {
+            "pdLineNum": 3,
+            "pdPtr": 3,
+            "pdRatesheetID": "SI-N",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 2300.0,
+            "pdMaxUnits": 0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "MO130",
+            "claimEngineNetworkId": "0",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "7",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+  test("does not gate 7011 when Line-Denied present", function () {
+    const codes = (res.getBody().lineItems || []).map((l) => String(l.message.code));
+    expect(codes).to.not.include("7011");
+  });
+  test("denied line NC = billed (1400)", function () {
+    const l1 = res.getBody().lineItems.find((l) => l.lineNumber === "0001");
+    expect(Number(l1.totalNotCoveredAmount)).to.equal(1400);
+  });
+  test("claimLevelGroupMethod AP", function () {
+    expect(res.getBody().claimLevel.claimLevelGroupMethod).to.equal("AP");
+  });
+}
+
+docs {
+  Mainframe export sync: source=AP-017 -TEST DATA FROM MAINFRAME.yaml; doc=202015594390009; key=202015594390009_9432015590009; serviceLines=updated 3; diagnosis=updated.
+  APCOP MF AP-017: doc 202015594390009_9432015590009; DX J342; lines=3; allowedCharges=0; pricingStatus 200; pricerType I; ovragCfg N.
+  Line-Denied-015: MF clinical lines 30140/1400, 30140/1300, 30520/2300 all pdAllowed 0; based SI-N; rate LN-DENIED-015,P10.
+}

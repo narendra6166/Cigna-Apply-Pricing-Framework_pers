@@ -1,0 +1,1769 @@
+{
+  "schema_version": 1,
+  "catalog_name": "CCAC-4226 / PTTC-4106 Apply Pricing",
+  "catalog_revision": "2026-10-16",
+  "sources": {
+    "scenario_list": "design/CCAC-4226-PTTC-4106-Apply-Pricing-System-Test-Scenarios-10-16-2026.docx",
+    "pricing_design": "design/CIGNA True_applypricing-design.pdf",
+    "scenario_detail": "../Apply-Pricing-Clear-System-Test-Scenarios.md"
+  },
+  "currency_tolerance": 0.02,
+  "group_method_map": {
+    "01": "MS",
+    "11": "MS",
+    "02": "AP",
+    "10": "AR"
+  },
+  "execution_blockers": {
+    "response_message_codes": [
+      "1301"
+    ],
+    "response_message_text_contains": [
+      "member plan information not found in redis",
+      "cvgselData is empty"
+    ],
+    "http_statuses": [
+      500,
+      502,
+      503,
+      504
+    ]
+  },
+  "design_conflicts": [
+    {
+      "id": "DC-01",
+      "topic": "Successful pricing status",
+      "scenario_source": "The October 16 design lists pricingStatus 1005 for AP-001.",
+      "detailed_design": "The detailed Apply Pricing scenario guide records status 200 for DEV and notes that mainframe data may use 1005.",
+      "treatment": "Accept 200 or 1005 as successful input status; assert response success separately. Confirm the environment-specific contract before narrowing this."
+    },
+    {
+      "id": "DC-02",
+      "topic": "Pricer type to schedule attribute",
+      "scenario_source": "The PDF's MVP2 derivation text maps I to APC pricing and 64 to ASC pricing, but its schedule-attribute statements reverse APCOP/ASCOP.",
+      "detailed_design": "Scenario descriptions map I to APCOP and 64 to ASCOP.",
+      "treatment": "Do not assert a schedule attribute as an expected response field; check the request route and observable amounts only."
+    },
+    {
+      "id": "DC-03",
+      "topic": "OTROP/DRG live payload identity",
+      "scenario_source": "The updated October 16 design expects OTROP-634 with group method 10/AR.",
+      "bruno_payloads": "The referenced OTROP-634 payload is not in the current Bruno collection. Older 453 candidate payloads use group method 01/MS and are not substitutes.",
+      "treatment": "Keep OTROP-634 in the 36-scenario catalog as Not Run until its matching payload is supplied; leave the older 453 request files unmapped."
+    },
+    {
+      "id": "DC-04",
+      "topic": "AP-015 over-allowed fixture",
+      "scenario_source": "AP-015 requires allowed greater than billed and ovragCfg=Y.",
+      "bruno_payloads": "The captured AP-015 request has no line with pdAllowed greater than chargeAmt and has ovragCfg=N.",
+      "treatment": "Mark this execution Blocked by unmet scenario preconditions."
+    },
+    {
+      "id": "DC-05",
+      "topic": "Crosswalk fallback and error values",
+      "scenario_source": "The detailed scenario guide expects ppoDiscReason 2002 for AP-045 and 7004 for AP-044 when the crosswalk ERROR_CD is positive.",
+      "pricing_design": "The PDF describes fallback to PPO RNC and leaves PPN RNC values / some crosswalk rows unresolved.",
+      "treatment": "Assert only the confirmed PCLM expectations; AP-044 remains conditional until an ERROR_CD-positive fixture is supplied."
+    },
+    {
+      "id": "DC-06",
+      "topic": "AP-SC18 all-excluded case rate",
+      "scenario_source": "The updated scenario inventory includes AP-SC18 but leaves the expected behavior blank.",
+      "detailed_design": "The supplementary scenario pack marks the all-excluded case-rate outcome TBD by the designer.",
+      "treatment": "Include AP-SC18 in the catalog as design-pending and Not Run until approved behavior and a payload are available."
+    },
+    {
+      "id": "DC-07",
+      "topic": "AP-031 plan-limit fixture",
+      "scenario_source": "AP-031 expects a planCoveredExpenseLimit of 2000 below billed 9000.",
+      "bruno_payloads": "The current payload has plan limits of 2000 on lines billed 816.71 and 359, so it does not meet the described trigger.",
+      "treatment": "Block the current execution on unmet input conditions. For a matching fixture, derive case-rate NC from the finite plan-limit basis and allowedCharges using the PDF rule."
+    },
+    {
+      "id": "DC-08",
+      "topic": "ASCOP evidence fixture",
+      "scenario_source": "ASCOP expects direct ASC pricing with pricerType 64.",
+      "bruno_payloads": "The current ASCOP with NC request uses pricerType S and groupMethod 10, so it does not exercise direct ASC pricing.",
+      "treatment": "Keep it mapped for comparison but require pricerType 64 and groupMethod 02; the current payload is Blocked instead of counted as a pass."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "AP-001",
+      "name": "Successful pricing status — Apply Pricing runs",
+      "category": "Pricing status / gates",
+      "payloads": [
+        "01-pricing-status-gates/AP-001-pricing-status-1005.bru"
+      ],
+      "expected": "A supported successful pricing status continues pricing; response message and service lines succeed, group method is AP, and every line/claim amount reconciles from the request.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "service_line_count_min",
+          "value": 1
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_message_code_in",
+          "values": [
+            "200"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-001",
+        "PDF p.3: MVP2 pricing status",
+        "Detailed scenario guide: AP-001"
+      ]
+    },
+    {
+      "id": "AP-002",
+      "name": "Error 7010 — bad pricing status",
+      "category": "Pricing status / gates",
+      "payloads": [
+        "01-pricing-status-gates/AP-002-Error-7010 bad pricingStatus 1003.bru"
+      ],
+      "expected": "For an ineligible pricingStatus, the service line returns 7010 (invalid SANP return code); no pricing calculation should be reported as successful.",
+      "conditions": [
+        {
+          "op": "pricing_status_not_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricing_details_present",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "any_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "200"
+          ],
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-002",
+        "Detailed scenario guide: AP-002"
+      ]
+    },
+    {
+      "id": "LIVE-APCOP",
+      "name": "APCOP live base — direct APC pricing",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/APCOP-pricerType-I.bru"
+      ],
+      "expected": "Successful pricerType I request returns AP grouping and direct service-line not-covered / excess amounts calculated from billed and allowed amounts.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "service_lines_have_pricing_area",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_message_code_in",
+          "values": [
+            "200"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: LIVE-APCOP",
+        "PDF p.4: APCOP direct line pricing",
+        "Detailed scenario guide: APCOP"
+      ]
+    },
+    {
+      "id": "AP-013",
+      "name": "APC — allowed less than billed",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/AP-013 APC allow less than billed.bru"
+      ],
+      "expected": "For each direct-priced line, Not Covered = billed - min(billed, allowed); claim excess equals the sum of positive allowed-over-billed amounts.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_lt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-013",
+        "PDF p.4: direct line pricing",
+        "Detailed scenario guide: AP-013"
+      ]
+    },
+    {
+      "id": "AP-014",
+      "name": "APC — allowed equals billed",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/AP-014-APC-allowed-eq-billed.bru"
+      ],
+      "expected": "Equal allowed and billed produces zero Not Covered on that line; all other source lines and the claim total reconcile to their own request values.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_eq_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-014",
+        "PDF p.4: direct line pricing",
+        "Detailed scenario guide: AP-014"
+      ]
+    },
+    {
+      "id": "AP-015",
+      "name": "APC — allowed greater than billed (excess)",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/AP-015-APC-allowed-gt-billed.bru"
+      ],
+      "expected": "When ovragCfg=Y and allowed exceeds billed, cap covered at billed and add the difference to claim excess.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "ovrag_cfg_equals",
+          "value": "Y"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_gt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-015",
+        "PDF p.4: excess amount",
+        "Detailed scenario guide: AP-015"
+      ]
+    },
+    {
+      "id": "AP-SC4",
+      "name": "APC multi-line mix — less than, equal, and greater than",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/Sc4-APC-mixed-three-lines.bru"
+      ],
+      "expected": "One claim covers under-allowed, equal, and over-allowed lines; line NC and claim excess are computed independently from each source line.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "ovrag_cfg_equals",
+          "value": "Y"
+        },
+        {
+          "op": "service_line_count_equals",
+          "value": 3
+        },
+        {
+          "op": "line_relations_include",
+          "values": [
+            "allowed_lt_billed",
+            "allowed_eq_billed",
+            "allowed_gt_billed"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-SC4",
+        "PDF p.4: direct line pricing and excess",
+        "Detailed scenario guide: AP-SC4"
+      ]
+    },
+    {
+      "id": "AP-017",
+      "name": "Denied line plus priced line — no false 7011",
+      "category": "APC / APCOP",
+      "payloads": [
+        "02-apc-apcop-direct/AP-017-line-denied-015.bru"
+      ],
+      "expected": "A zero-allowed Line-Denied-015 line must not trigger 7011; a separate priced line continues and receives its own line result.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "I"
+        },
+        {
+          "op": "denied_zero_allowed_line_present",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7011"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "success_service_line_present",
+          "severity": "partial"
+        },
+        {
+          "op": "priced_line_with_positive_allowed_present",
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-017",
+        "PDF p.4: zero-allowed 7011 gate and Line-Denied-015 exception"
+      ]
+    },
+    {
+      "id": "AP-004",
+      "name": "ASC — allowed less than billed",
+      "category": "ASC / ASCOP",
+      "payloads": [
+        "03-asc-ascop-direct/AP-004-pricerType-64-ASC.bru"
+      ],
+      "expected": "A successful pricerType 64 direct-priced line reports Not Covered as billed minus covered; line and claim values reconcile.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "64"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_lt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_message_code_in",
+          "values": [
+            "200"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-004",
+        "PDF p.4: direct line pricing",
+        "Detailed scenario guide: AP-004"
+      ]
+    },
+    {
+      "id": "AP-021",
+      "name": "DRG grouped — allowed less than billed with excluded line",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/AP-021-DRG-allowed-lt-billed.bru"
+      ],
+      "expected": "groupMethod 01 returns MS; included lines share the summed allowed amount in proportion to billed charges; each excluded line uses its own allowed amount.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "01"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "included_line_count_min",
+          "value": 2
+        },
+        {
+          "op": "excluded_line_count_min",
+          "value": 1
+        },
+        {
+          "op": "included_allowed_relation",
+          "value": "lt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "MS",
+          "severity": "critical"
+        },
+        {
+          "op": "grouped_amounts_reconcile",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7003",
+            "7010",
+            "7011"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "all_source_line_codes_in",
+          "values": [
+            "200"
+          ],
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-021",
+        "PDF p.4: DRG excluded/included pricing and proportional allocation",
+        "Detailed scenario guide: AP-021"
+      ]
+    },
+    {
+      "id": "AP-024",
+      "name": "DRG grouped — included billed below group allowed",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/AP-024-DRG-no-down-proration.bru"
+      ],
+      "expected": "When total included-group allowed exceeds total included billed, do not prorate covered amounts below billed; the excess is handled in pass 2.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "01"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "included_line_count_min",
+          "value": 1
+        },
+        {
+          "op": "included_allowed_relation",
+          "value": "gt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "MS",
+          "severity": "critical"
+        },
+        {
+          "op": "grouped_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-024",
+        "PDF p.4: group-allowed-greater-than-billed pass-2 rule",
+        "Detailed scenario guide: AP-024"
+      ]
+    },
+    {
+      "id": "AP-025",
+      "name": "Used DRG without qualifying 8888 A/SA",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/AP-025-DRG-usedDrg-no-8888.bru"
+      ],
+      "expected": "With UsedDRG but no 8888 usage A/SA, do not create a synthetic DRG grouped line and do not return status-gate error 7010.",
+      "conditions": [
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_absent",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_line_id_absent",
+          "value": "DRG",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-025",
+        "PDF p.4: DRG line eligibility and case-rate/PDM fallback"
+      ]
+    },
+    {
+      "id": "AP-026",
+      "name": "DRG context — line allowed greater than billed returns 7001",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/AP-026-DRG-allowed-gt-billed-7001.bru"
+      ],
+      "expected": "In a DRG claim with a qualifying 8888 A/SA rule, a line-priced line whose allowed amount exceeds billed returns 7001.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_gt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "over_allowed_lines_return_code",
+          "value": "7001",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-026",
+        "PDF p.4: mixed DRG/line-pricing 7001 rule"
+      ]
+    },
+    {
+      "id": "DRGOP",
+      "name": "DRGOP base — MS grouped Apply Pricing",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/DRGOP-0432625710010.bru",
+        "04-drg-drgop-grouped/DRGOP-202622604347041-PTTC-4026.bru"
+      ],
+      "expected": "A qualifying DRGOP request routes as MS, processes its service lines, and does not hit 7003, 7010, or 7011.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "01"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "MS",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7003",
+            "7010",
+            "7011"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "success_service_line_present",
+          "severity": "critical"
+        },
+        {
+          "op": "all_source_line_codes_in",
+          "values": [
+            "200"
+          ],
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: DRGOP",
+        "PDF p.4: DRG routing",
+        "Detailed scenario guide: DRGOP"
+      ]
+    },
+    {
+      "id": "Error-7003",
+      "name": "Missing DRG TOS line — error 7003",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/Error-7003-missing-DRG-line.bru"
+      ],
+      "expected": "A qualifying DRG request missing the required DRG TOS line returns service-line error 7003.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "no_service_procedure_type",
+          "values": [
+            "DRG"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "any_service_line_code_in",
+          "values": [
+            "7003"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: Error-7003",
+        "PDF p.4: qualifying DRG create requirements",
+        "Detailed scenario guide: Error-7003"
+      ]
+    },
+    {
+      "id": "AP-008",
+      "name": "Case rate 8888 — group method AR",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/AP-008-case-rate-8888-A.bru"
+      ],
+      "expected": "A case-rate request with 8888 usage A, blank UsedDRG, and groupMethod 10 returns claimLevelGroupMethod AR and does not return 7010.",
+      "conditions": [
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "response_message_code_in",
+          "values": [
+            "200",
+            "201"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-008",
+        "PDF p.3-4: case-rate routing",
+        "Detailed scenario guide: AP-008"
+      ]
+    },
+    {
+      "id": "AP-028",
+      "name": "OTROP case rate — included and excluded lines",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/AP-028-case-rate-included-excluded.bru"
+      ],
+      "expected": "Case-rate method AR; excluded lines use their own allowed amount and included lines share grouped allowed charges proportionally.",
+      "conditions": [
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "included_line_count_min",
+          "value": 1
+        },
+        {
+          "op": "excluded_line_count_min",
+          "value": 1
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "grouped_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-028",
+        "PDF p.4: Case Rate included/excluded allocation",
+        "Detailed scenario guide: AP-028"
+      ]
+    },
+    {
+      "id": "AP-ANC",
+      "name": "OTROP with ANC",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/OTROP with ANC.bru"
+      ],
+      "expected": "An OTROP/AR overage case emits the ANC adjustment when the configured overage conditions apply.",
+      "conditions": [
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "ovrag_cfg_equals",
+          "value": "Y"
+        },
+        {
+          "op": "request_excess_present",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "response_line_id_present",
+          "value": "ANC",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-ANC",
+        "PDF p.4: case-rate overage and ANC line"
+      ]
+    },
+    {
+      "id": "OTROP-634",
+      "name": "OTROP / case rate base — AR grouping",
+      "category": "Case Rate / OTROP",
+      "payloads": [],
+      "expected": "A qualifying case-rate request with blank UsedDRG and 8888 usage A/SA returns claimLevelGroupMethod AR and line success. The referenced request is not currently present in the Bruno collection.",
+      "conditions": [
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "success_service_line_present",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: OTROP-634",
+        "PDF p.4: case-rate route",
+        "Detailed scenario guide: OTROP-634"
+      ]
+    },
+    {
+      "id": "AP-006",
+      "name": "SOSOP based-on F / N",
+      "category": "SOS / SOSOP",
+      "payloads": [
+        "02-apc-apcop-direct/AP-006-SOS-basedon-F.bru"
+      ],
+      "expected": "A successful pricing request with a supported based-on F or N rule continues Apply Pricing without 7010; line and claim amounts reconcile to request billed/allowed values.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricing_basedon_present",
+          "values": [
+            "F",
+            "N"
+          ]
+        },
+        {
+          "op": "service_lines_have_pricing_area",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-006",
+        "PDF p.4: SOSOP based-on / 9999 processing",
+        "GFRD scenario guide: AP-006"
+      ]
+    },
+    {
+      "id": "ASCOP",
+      "name": "ASCOP base — ASC direct pricing",
+      "category": "ASC / ASCOP",
+      "payloads": [
+        "03-asc-ascop-direct/ASCOP with NC.bru"
+      ],
+      "expected": "The ASCOP base request uses pricerType 64, processes its line, and reconciles not-covered to billed minus the applicable allowed amount.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "64"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "service_lines_have_pricing_area",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: ASCOP",
+        "PDF p.4: direct line pricing",
+        "Detailed scenario guide: ASCOP"
+      ]
+    },
+    {
+      "id": "AP-ASC-EQ",
+      "name": "ASC allowed equals billed",
+      "category": "ASC / ASCOP",
+      "payloads": [
+        "03-asc-ascop-direct/AP-ASC-EQ-allowed-eq-billed.bru"
+      ],
+      "expected": "With pricerType 64 and allowed equal to billed, the source line returns message 200 with zero not-covered amount.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "64"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "02"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_eq_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-ASC-EQ",
+        "PDF p.4: direct line pricing",
+        "Detailed scenario guide: AP-ASC-EQ"
+      ]
+    },
+    {
+      "id": "AP-ASC-GT",
+      "name": "ASC allowed greater than billed",
+      "category": "ASC / ASCOP",
+      "payloads": [
+        "03-asc-ascop-direct/AP-ASC-GT-allowed-gt-billed.bru"
+      ],
+      "expected": "With pricerType 64, ovragCfg Y, and allowed greater than billed, the line succeeds and the overage is reported in claim excess; ANC is checked only when designed.",
+      "conditions": [
+        {
+          "op": "pricer_type_equals",
+          "value": "64"
+        },
+        {
+          "op": "ovrag_cfg_equals",
+          "value": "Y"
+        },
+        {
+          "op": "line_relation_present",
+          "value": "allowed_gt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AP",
+          "severity": "critical"
+        },
+        {
+          "op": "over_allowed_lines_return_code",
+          "value": "200",
+          "severity": "critical"
+        },
+        {
+          "op": "claim_excess_positive",
+          "severity": "critical"
+        },
+        {
+          "op": "response_line_id_present",
+          "value": "9997",
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-ASC-GT",
+        "PDF p.4: excess amount and ANC follow-up",
+        "Detailed scenario guide: AP-ASC-GT"
+      ]
+    },
+    {
+      "id": "AP-ASC-9999",
+      "name": "ASC stop-loss rule 9999",
+      "category": "ASC / ASCOP",
+      "payloads": [
+        "03-asc-ascop-direct/AP-ASC-9999-stop-loss.bru"
+      ],
+      "expected": "A pricerType 64 request with pricing rule 9999 usage A/SA continues without 7010 and reconciles line/claim not-covered using the source billed/allowed amounts.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "64"
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 9999,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "direct_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-ASC-9999",
+        "PDF p.4: 9999 lesser-of processing",
+        "GFRD scenario guide: AP-ASC-9999"
+      ]
+    },
+    {
+      "id": "AP-DRG-RNC",
+      "name": "DRG RNC derivation",
+      "category": "DRG / DRGOP",
+      "payloads": [
+        "04-drg-drgop-grouped/AP-DRG-RNC-xwalk.bru"
+      ],
+      "expected": "A qualifying DRG request routes as MS and does not return 7003; record the RNC returned by the environment's crosswalk without assuming a specific value.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "pricer_type_equals",
+          "value": "S"
+        },
+        {
+          "op": "group_method_equals",
+          "value": "01"
+        },
+        {
+          "op": "used_drg_present",
+          "value": true
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "MS",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7003"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "all_source_line_codes_in",
+          "values": [
+            "200"
+          ],
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-DRG-RNC",
+        "PDF p.4-5: DRG RNC/crosswalk handling",
+        "GFRD scenario guide: AP-DRG-RNC"
+      ]
+    },
+    {
+      "id": "AP-OTROP-ALLOC",
+      "name": "OTROP allocated amount exceeds billed",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/AP-OTROP-ALLOC-allocated-gt-billed.bru"
+      ],
+      "expected": "A case-rate group amount above included billed charges routes as AR, avoids 7010, and reports positive excess; ANC is included only if the configured design creates it.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "ovrag_cfg_equals",
+          "value": "Y"
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "group_allowed_gt_included_billed",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "claim_excess_positive",
+          "severity": "critical"
+        },
+        {
+          "op": "response_line_id_present",
+          "value": "9997",
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-OTROP-ALLOC",
+        "PDF p.4: case-rate allocation and excess",
+        "GFRD scenario guide: AP-OTROP-ALLOC"
+      ]
+    },
+    {
+      "id": "AP-031",
+      "name": "Case rate plan-covered expense limit",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/AP-031-plan-covered-limit-low.bru"
+      ],
+      "expected": "With a finite planCoveredExpenseLimit below the line billed amount, use the lesser covered basis, prorate the case amount across included lines, and reconcile line/claim NC.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "plan_limit_relation_present",
+          "value": "lt_billed"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "case_rate_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-031",
+        "PDF p.4: plan covered expense limit and case-rate proration",
+        "GFRD scenario guide: AP-031"
+      ]
+    },
+    {
+      "id": "AP-033",
+      "name": "Case rate unlimited plan-covered expense limit",
+      "category": "Case Rate / OTROP",
+      "payloads": [
+        "05-otrop-case-rate-grouped/AP-033-plan-covered-limit-unlimited.bru"
+      ],
+      "expected": "An all-9s planCoveredExpenseLimit is treated as unlimited; case-rate coverage uses billed amounts and normal AR proration.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "group_method_equals",
+          "value": "10"
+        },
+        {
+          "op": "used_drg_present",
+          "value": false
+        },
+        {
+          "op": "pricing_rule_present",
+          "line_num": 8888,
+          "usages": [
+            "A",
+            "SA"
+          ]
+        },
+        {
+          "op": "plan_limit_unlimited_present",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_group_method_equals",
+          "value": "AR",
+          "severity": "critical"
+        },
+        {
+          "op": "case_rate_amounts_reconcile",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-033",
+        "PDF p.4: all-9s plan limit uses billed charges",
+        "GFRD scenario guide: AP-033"
+      ]
+    },
+    {
+      "id": "AP-SC18",
+      "name": "All service lines excluded case rate",
+      "category": "Case Rate / OTROP",
+      "payloads": [],
+      "expected": "Designer decision is still required for a case-rate claim where all service lines are excluded; do not infer grouped pricing, NC, or status behavior.",
+      "readiness": "design_pending",
+      "conditions": [],
+      "checks": [],
+      "design_refs": [
+        "October 16 design: AP-SC18",
+        "Supplemental scenario inventory: all-excluded case rate marked TBD"
+      ]
+    },
+    {
+      "id": "AP-034",
+      "name": "Zero allowed with no Denied — error 7011",
+      "category": "Errors / payload",
+      "payloads": [
+        "06-errors-and-rnc/AP-034-Error-7011 zero allowed.bru"
+      ],
+      "expected": "If total claim allowed is zero and no rate type contains Denied, a service line returns 7011 and the manual-pricing message.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "total_allowed_is_zero",
+          "value": true
+        },
+        {
+          "op": "denied_rate_type_present",
+          "value": false
+        }
+      ],
+      "checks": [
+        {
+          "op": "any_service_line_code_in",
+          "values": [
+            "7011"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "response_text_contains",
+          "path": "lineItems[*].message.description",
+          "value": "No pricing received",
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-034",
+        "PDF p.3-4: zero-allowed error",
+        "Detailed scenario guide: AP-034"
+      ]
+    },
+    {
+      "id": "AP-035",
+      "name": "Zero allowed with Denied — must not return 7011",
+      "category": "Errors / payload",
+      "payloads": [
+        "06-errors-and-rnc/AP-035-zero-allowed-Denied.bru"
+      ],
+      "expected": "A zero-allowed request containing a Denied rate type must not trigger 7011.",
+      "conditions": [
+        {
+          "op": "total_allowed_is_zero",
+          "value": true
+        },
+        {
+          "op": "denied_rate_type_present",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7011"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-035",
+        "PDF p.3-4: 7011 Denied exception"
+      ]
+    },
+    {
+      "id": "AP-7012",
+      "name": "Missing pricingArea — error 7012",
+      "category": "Errors / payload",
+      "payloads": [
+        "06-errors-and-rnc/AP-7012-missing-pricingArea.bru.bru"
+      ],
+      "expected": "A service line without pricingArea returns line message 7012 for missing pricing data.",
+      "conditions": [
+        {
+          "op": "pricing_details_present",
+          "value": true
+        },
+        {
+          "op": "service_line_missing_pricing_area",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "any_service_line_code_in",
+          "values": [
+            "7012"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-7012",
+        "Detailed scenario guide: AP-7012"
+      ]
+    },
+    {
+      "id": "AP-058",
+      "name": "No pricingDetails — Apply Pricing is off",
+      "category": "Errors / payload",
+      "payloads": [
+        "06-errors-and-rnc/AP-058-no-pricingDetails.bru"
+      ],
+      "expected": "Without pricingDetails, Apply Pricing does not emit errors 7010, 7011, or 7012.",
+      "conditions": [
+        {
+          "op": "pricing_details_present",
+          "value": false
+        }
+      ],
+      "checks": [
+        {
+          "op": "no_service_line_code_in",
+          "values": [
+            "7010",
+            "7011",
+            "7012"
+          ],
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-058",
+        "Detailed scenario guide: AP-058"
+      ]
+    },
+    {
+      "id": "AP-038",
+      "name": "OCE 005 crosswalk — PCLM RNC 1813",
+      "category": "Crosswalk / RNC",
+      "payloads": [
+        "06-errors-and-rnc/AP-038-OCE-005-RNC-1813.bru"
+      ],
+      "expected": "Rate type OCE 005 resolves to PCLM RNC 1813 on the service line while processing succeeds.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "numeric_rate_type_present",
+          "value": "005"
+        }
+      ],
+      "checks": [
+        {
+          "op": "response_message_code_in",
+          "values": [
+            "200",
+            "201"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "rnc_present",
+          "value": 1813,
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-038",
+        "PDF p.5: OCE crosswalk (005 -> PCLM 1813)",
+        "Detailed scenario guide: AP-038"
+      ]
+    },
+    {
+      "id": "AP-045",
+      "name": "Blank crosswalk — use ppoDiscReason fallback",
+      "category": "Crosswalk / RNC",
+      "payloads": [
+        "06-errors-and-rnc/AP-045-ppoDiscReason-fallback.bru"
+      ],
+      "expected": "When crosswalk keys are blank, use the configured ppoDiscReason (2002) as the service-line RNC.",
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "ppo_disc_reason_equals",
+          "value": 2002
+        },
+        {
+          "op": "numeric_rate_type_absent",
+          "value": true
+        }
+      ],
+      "checks": [
+        {
+          "op": "rnc_matches_request_ppo_disc_reason",
+          "severity": "critical"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-045",
+        "PDF p.5: unmapped crosswalk fallback",
+        "Detailed scenario guide: AP-045"
+      ]
+    },
+    {
+      "id": "AP-044",
+      "name": "Unmapped rate type — crosswalk error returns 7004",
+      "category": "Crosswalk / RNC",
+      "payloads": [
+        "06-errors-and-rnc/AP-044-Error-7004.bru"
+      ],
+      "expected": "Return 7004 only when the matching SANP_RNC_XWALK entry has ERROR_CD > 0; preserve that error in the additional error area and continue other lines.",
+      "readiness": "conditional",
+      "conditional_reason": "The current design and payload do not establish that the selected crosswalk row has ERROR_CD > 0.",
+      "activation": {
+        "op": "any_service_line_code_in",
+        "values": [
+          "7004"
+        ]
+      },
+      "conditions": [
+        {
+          "op": "pricing_status_in",
+          "values": [
+            200,
+            1005
+          ]
+        },
+        {
+          "op": "numeric_rate_type_present",
+          "value": "005"
+        }
+      ],
+      "checks": [
+        {
+          "op": "any_service_line_code_in",
+          "values": [
+            "7004"
+          ],
+          "severity": "critical"
+        },
+        {
+          "op": "response_text_contains",
+          "path": "lineItems[*].message.description",
+          "value": "Send claim to manual processor",
+          "severity": "partial"
+        }
+      ],
+      "design_refs": [
+        "October 16 design: AP-044",
+        "PDF p.5: ERROR_CD > 0 returns 7004",
+        "Detailed scenario guide: AP-044"
+      ]
+    }
+  ]
+}

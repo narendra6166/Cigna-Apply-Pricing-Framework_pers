@@ -1,0 +1,179 @@
+meta {
+
+  name: AP-045 unmapped uses ppoDiscReason
+  type: http
+  seq: 8
+}
+
+post {
+
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202628704310837_0432628710837",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "921015344",
+      "subscriberPid": "18573971176136",
+      "patientPid": "18573971176136",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19730218",
+      "memberNetwork": "OA128"
+    },
+    "planInformation": {
+      "soc": "43022",
+      "clientId": "9507016",
+      "accountNumber": "2011025",
+      "branch": "0001",
+      "benopt": "HSA14",
+      "planSchedule": "DRGOP"
+    },
+    "providers": {
+      "providerTin": "201510122",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "3443113",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "3443113",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "AAM",
+      "renderingProviderType": "40",
+      "network": "INN",
+      "zipCode": "60400000",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202628704310837_0432628710837",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "I10",
+        "formType": "HCFA",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "0",
+          "groupMethod": "01",
+          "pricerType": "S",
+          "pricingStatus": 200,
+          "allowedCharges": 80.63,
+          "allowedExcessCharges": "",
+          "savings": 0,
+          "ppoDiscReason": 2002,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": ""
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "PERCENT"
+                },
+                {
+                  "pdRateTypeCode": "DISCOUNT"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "J1250",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 178.0,
+          "diagnosisCode": "I10",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "21",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 80.63,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 178.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "CT704",
+            "claimEngineNetworkId": "8002038",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "7",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  Mainframe export sync: source=AP-045-TEST DATA FROM MAINFRAME.yaml; doc=202628704310837; key=202628704310837_0432628710837; serviceLines=updated 1; diagnosis=updated.
+  Real GFRD overlay 2026-10-15: claimCcrKey=202628704310837_0432628710837 doc=202628704310837 SCHEDULEATTR=DRGOP pricingStatus=200 lines=1 allowedCharges=80.63.
+
+  AP-045. Blank xwalk keys. ppoDiscReason 2002 should appear on orders.reasonNotCovered when xwalk is blank.
+}

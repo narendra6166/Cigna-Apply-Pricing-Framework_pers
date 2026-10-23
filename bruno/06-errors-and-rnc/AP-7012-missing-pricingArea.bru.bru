@@ -1,0 +1,174 @@
+meta {
+
+  name: AP-7012-missing-pricingArea.bru
+  type: http
+  seq: 3
+}
+
+post {
+
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202628604315464_0432628615464",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "922070569",
+      "subscriberPid": "363644027169605",
+      "patientPid": "363644027169605",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19710117",
+      "memberNetwork": "OA128"
+    },
+    "planInformation": {
+      "soc": "43580",
+      "clientId": "9507818",
+      "accountNumber": "2210023",
+      "branch": "0001",
+      "benopt": "OAP1R",
+      "planSchedule": "ASCOP"
+    },
+    "providers": {
+      "providerTin": "202508426",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "1479958",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "1479958",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "AAM",
+      "renderingProviderType": "65",
+      "network": "INN",
+      "zipCode": "303541991",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202628604315464_0432628615464",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "A021",
+        "formType": "HCFA",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "0",
+          "groupMethod": "02",
+          "pricerType": "64",
+          "pricingStatus": 200,
+          "allowedCharges": 186.5,
+          "allowedExcessCharges": "0",
+          "savings": 101.6,
+          "ppoDiscReason": 0,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": ""
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "PERCENT"
+                },
+                {
+                  "pdRateTypeCode": "DISCOUNT"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "S9338",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 250.0,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "GA304",
+            "claimEngineNetworkId": "10002018",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+  test("line 7012 missing pricing area", function () {
+    expect(String(res.getBody().lineItems[0].message.code)).to.eql("7012");
+  });
+}
+
+docs {
+  Mainframe export sync: source=AP-7012-TEST DATA FROM MAINFRAME.yaml; doc=202628604315464; key=202628604315464_0432628615464; serviceLines=updated 1; diagnosis=updated.
+  Real GFRD overlay 2026-10-15: claimCcrKey=202628604315464_0432628615464 doc=202628604315464 SCHEDULEATTR=ASCOP pricingStatus=200 lines=1 allowedCharges=186.5.
+
+  Scenario 3 — Error 7012 (missing pricingArea).
+  Input: claimCcrKey=202625444390007_4432625490007, pricingStatus=1005, pricerType blank, NO pricingArea on line.
+  Expected: line message code 7012.
+  See bruno/TEST-THESE-3-ERRORS.md
+}

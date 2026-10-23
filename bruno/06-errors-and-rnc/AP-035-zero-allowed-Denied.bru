@@ -1,0 +1,182 @@
+meta {
+
+  name: AP-035 zero allowed with Denied skips 7011
+  type: http
+  seq: 2
+}
+
+post {
+
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202624604325520_0432624625520",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "918050187",
+      "subscriberPid": "13810590640219",
+      "patientPid": "13810590640219",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19850118",
+      "memberNetwork": ""
+    },
+    "planInformation": {
+      "soc": "42314",
+      "clientId": "9506013",
+      "accountNumber": "1708003",
+      "branch": "0001",
+      "benopt": "MOIN1",
+      "planSchedule": "APCOP"
+    },
+    "providers": {
+      "providerTin": "201921081",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "7583236",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "7583236",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "IM",
+      "renderingProviderType": "44",
+      "network": "INN",
+      "zipCode": "800140000",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202624604325520_0432624625520",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "R6889",
+        "formType": "U",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "24",
+          "groupMethod": "02",
+          "pricerType": "I",
+          "pricingStatus": 200,
+          "allowedCharges": 0.0,
+          "allowedExcessCharges": "0",
+          "savings": 825.0,
+          "ppoDiscReason": 0,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "SI-E1"
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "CLM-DENIED"
+                },
+                {
+                  "pdRateTypeCode": "LN-DENIED-048"
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "99215",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00300",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 435.0,
+          "diagnosisCode": "R6889",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "SI-E1",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 435.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "AMS000006",
+            "providerNetworkIndicator": "O",
+            "networkId": "CO137",
+            "claimEngineNetworkId": "11000007",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "7",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20240101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20241001",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+  test("not 7011 when Denied is present", function () {
+    expect(String(res.getBody().lineItems[0].message.code)).to.not.eql("7011");
+  });
+}
+
+docs {
+  Mainframe export sync: source=AP-035-TEST DATA FROM MAINFRAME.yaml; doc=202624604325520; key=202624604325520_0432624625520; serviceLines=updated 1; diagnosis=updated.
+  Real GFRD overlay 2026-10-15: claimCcrKey=202624604325520_0432624625520 doc=202624604325520 SCHEDULEATTR=APCOP pricingStatus=200 lines=1 allowedCharges=0.0.
+
+  AP-035. Claim allowed 0 but rate type CLM-Denied. Must not raise 7011.
+}

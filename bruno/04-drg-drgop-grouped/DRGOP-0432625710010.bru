@@ -1,0 +1,387 @@
+meta {
+
+  name: DRGOP 0432625710010
+  type: http
+  seq: 6
+}
+
+post {
+
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202627404311671_0432627411671",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "noCalcGroupReplay": false,
+    "memberInformation": {
+      "employeeSsn": "920029227",
+      "subscriberPid": "926113948621392",
+      "patientPid": "926113948621392",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19650618",
+      "patAdmitByPcp": "N",
+      "accums": [],
+      "patRelation": "E",
+      "serviceAccums": null,
+      "memberNetwork": ""
+    },
+    "planInformation": {
+      "soc": "42836",
+      "clientId": "9506763",
+      "accountNumber": "3340568",
+      "branch": "0001",
+      "benopt": "OAPM",
+      "neutralBenInd": "N",
+      "patNum": 1,
+      "class": "",
+      "classEffDt": "",
+      "classDefaultTier": 0,
+      "socElectInd": "",
+      "classElectInd": "",
+      "socTypAcctg": "A",
+      "locsscElectInd": "",
+      "planSchedule": "DRGOP",
+      "oploc": 4155091208022
+    },
+    "providers": {
+      "providerTin": "202050502",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "1229407",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "1229407",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "FHS",
+      "renderingProviderType": "40",
+      "network": "INN",
+      "zipCode": "328862304",
+      "stateSurcharge": "",
+      "authorizeInd": "N",
+      "pvpStatus": "",
+      "urAdmitStatInd": "",
+      "detProvNetInd": "O"
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202627404311671_0432627411671",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "A000",
+        "formType": "U",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "0446",
+          "groupVersion": "37",
+          "groupMethod": "01",
+          "pricerType": "S",
+          "pricingStatus": 200,
+          "allowedCharges": 1899999.06,
+          "allowedExcessCharges": "0",
+          "savings": 594.96,
+          "ppoDiscReason": 698,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "  "
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "  "
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 8888,
+              "pdOriginalLineNum": 8888
+            },
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": ""
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": ""
+                }
+              ],
+              "pdUsage": "",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            },
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": "  "
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": "  "
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 2,
+              "pdOriginalLineNum": 2
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "lineNum": "0001",
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "70010",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "X",
+          "chargeAmt": 888.0,
+          "diagnosisCode": "A000",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "",
+          "enhancementCode": "",
+          "causeCode": "L",
+          "taxIdSeqNum": "0000001",
+          "providerType": "40",
+          "specialtyCode": "FHS",
+          "location": "D",
+          "colUsage": "N",
+          "mhpProcEffDt": 0,
+          "mhpProcTrmDt": 0,
+          "mhpProcSubClass": "",
+          "mhpRevEffDt": 0,
+          "mhpRevTrmDt": 0,
+          "mhpRevSub": "",
+          "sscExclInd": "",
+          "typeOfService": "XR",
+          "procedureType": "C",
+          "tlcType": "N",
+          "ppoTierInd": "",
+          "tierLvlMapCode": "",
+          "procCode": "70010",
+          "hcpcsCode": "",
+          "selGroup": 699,
+          "calcGroup": 350,
+          "reasonDenied": 0,
+          "acmOccInd": "N",
+          "spanDtInd": "N",
+          "prvSurchargeSt": "",
+          "srvTLC": "NDL",
+          "procedureCovered": "Y",
+          "planCoveredExpenseLimit": 9999999999,
+          "pricingArea": {
+            "pdLineNume": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 949999.53,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 888.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0,
+            "pdLineNum": 1
+          },
+          "networkArea": {
+            "rateSheet": "CRAV0874",
+            "providerNetworkIndicator": "O",
+            "networkId": "FL305",
+            "claimEngineNetworkId": "9002066",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": ""
+          }
+        },
+        {
+          "lineNum": "0002",
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "DRG470",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 888.0,
+          "diagnosisCode": "A000",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "",
+          "enhancementCode": "",
+          "causeCode": "L",
+          "taxIdSeqNum": "0000001",
+          "providerType": "40",
+          "specialtyCode": "FHS",
+          "location": "D",
+          "colUsage": "N",
+          "mhpProcEffDt": 0,
+          "mhpProcTrmDt": 0,
+          "mhpProcSubClass": "",
+          "mhpRevEffDt": 0,
+          "mhpRevTrmDt": 0,
+          "mhpRevSub": "",
+          "sscExclInd": "",
+          "typeOfService": "DRG",
+          "procedureType": "C",
+          "tlcType": "N",
+          "ppoTierInd": "",
+          "tierLvlMapCode": "",
+          "procCode": "DRG470",
+          "hcpcsCode": "",
+          "selGroup": 699,
+          "calcGroup": 350,
+          "reasonDenied": 0,
+          "acmOccInd": "N",
+          "spanDtInd": "N",
+          "prvSurchargeSt": "",
+          "srvTLC": "NDL",
+          "procedureCovered": "Y",
+          "planCoveredExpenseLimit": 9999999999,
+          "pricingArea": {
+            "pdLineNume": 2,
+            "pdPtr": 2,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 474999.77,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 888.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0,
+            "pdLineNum": 2
+          },
+          "networkArea": {
+            "rateSheet": "CRAV0874",
+            "providerNetworkIndicator": "O",
+            "networkId": "FL305",
+            "claimEngineNetworkId": "9002066",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": ""
+          }
+        },
+        {
+          "lineNum": "0003",
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "70010",
+          "procedureCodeType": "CPT",
+          "revenueCode": "",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "X",
+          "chargeAmt": 1999999.0,
+          "diagnosisCode": "A000",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "",
+          "enhancementCode": "",
+          "causeCode": "L",
+          "taxIdSeqNum": "0000001",
+          "providerType": "40",
+          "specialtyCode": "FHS",
+          "location": "D",
+          "colUsage": "N",
+          "mhpProcEffDt": 0,
+          "mhpProcTrmDt": 0,
+          "mhpProcSubClass": "",
+          "mhpRevEffDt": 0,
+          "mhpRevTrmDt": 0,
+          "mhpRevSub": "",
+          "sscExclInd": "",
+          "typeOfService": "XR",
+          "procedureType": "C",
+          "tlcType": "N",
+          "ppoTierInd": "",
+          "tierLvlMapCode": "",
+          "procCode": "70010",
+          "hcpcsCode": "",
+          "selGroup": 699,
+          "calcGroup": 350,
+          "reasonDenied": 0,
+          "acmOccInd": "N",
+          "spanDtInd": "N",
+          "prvSurchargeSt": "",
+          "srvTLC": "NDL",
+          "procedureCovered": "Y",
+          "planCoveredExpenseLimit": 9999999999,
+          "pricingArea": {
+            "pdLineNume": 1,
+            "pdPtr": 3,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 474999.76,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 1999999.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0,
+            "pdLineNum": 3
+          },
+          "networkArea": {
+            "rateSheet": "CRAV0874",
+            "providerNetworkIndicator": "O",
+            "networkId": "FL305",
+            "claimEngineNetworkId": "9002066",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": ""
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+  test("not 7003", function () {
+    expect(String(res.getBody().lineItems[0].message.code)).to.not.eql("7003");
+  });
+}
+
+docs {
+  Real GFRD overlay 2026-10-15: claimCcrKey=202627404311671_0432627411671 doc=202627404311671 SCHEDULEATTR=DRGOP pricingStatus=200 lines=3 allowedCharges=1899999.06.
+
+  Live DRGOP claim 0432625710010. planSchedule DRGOP, pricerType S, usedDrg 470, 8888 A, clinical XR line plus typeOfService DRG line 0002.
+}

@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "name": "Cigna TRUE Apply Pricing - DEV",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git",
+    "_generate_collection.py"
+  ]
+}

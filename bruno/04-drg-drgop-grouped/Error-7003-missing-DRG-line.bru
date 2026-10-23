@@ -1,0 +1,228 @@
+meta {
+  name: Error 7003 missing DRG line
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202625004312401_0432625012401",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "926041853",
+      "subscriberPid": "657344156070023",
+      "patientPid": "809314156070023",
+      "cedRelationship": "E",
+      "patientSuffix": "02",
+      "patientDob": "19730327",
+      "memberNetwork": "OA128"
+    },
+    "planInformation": {
+      "soc": "47998",
+      "clientId": "9516108",
+      "accountNumber": "3347078",
+      "branch": "0001",
+      "benopt": "PREMM",
+      "planSchedule": "OTROP"
+    },
+    "providers": {
+      "providerTin": "799355068",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "0713149",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "0713149",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "IM",
+      "renderingProviderType": "40",
+      "network": "INN",
+      "zipCode": "321773732",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202625004312401_0432625012401",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "A021",
+        "formType": "U",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "0872",
+          "groupVersion": "42",
+          "groupMethod": "01",
+          "pricerType": "S",
+          "pricingStatus": 200,
+          "allowedCharges": 0.0,
+          "allowedExcessCharges": "",
+          "savings": 0,
+          "ppoDiscReason": 0,
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [
+                {
+                  "pdBasedonCode": ""
+                }
+              ],
+              "pdRateTypeCd": [
+                {
+                  "pdRateTypeCode": ""
+                }
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 8888,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "99213",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00110",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 5000.0,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "",
+            "pdAllowed": 0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 1000.0,
+            "pdMaxUnits": 0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "FL305",
+            "claimEngineNetworkId": "9002066",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "6",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        },
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "99213",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00120",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 5000.0,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0002",
+          "pricingArea": {
+            "pdLineNum": 2,
+            "pdPtr": 2,
+            "pdRatesheetID": "",
+            "pdAllowed": 0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 1000.0,
+            "pdMaxUnits": 0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "FL305",
+            "claimEngineNetworkId": "9002066",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "6",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+  test("line 7003", function () {
+    expect(String(res.getBody().lineItems[0].message.code)).to.eql("7003");
+  });
+}
+
+docs {
+  Mainframe export sync: source=Error-7003-TEST DATA FROM MAINFRAME.yaml; doc=202625004312401; key=202625004312401_0432625012401; serviceLines=updated 2; diagnosis=updated.
+  MF Error-7003 doc 202625004312401 ERRORCD 7003 usedDrg 0872.
+  Member 926041853 subscriberPid 657344156070023 (NOT 0) patientPid 809314156070023.
+  Missing TOS DRG service line + 8888 A rule => expect line message 7003.
+  pricingStatus 200.
+}

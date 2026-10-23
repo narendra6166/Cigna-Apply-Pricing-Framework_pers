@@ -1,0 +1,10 @@
+# Bruno environment files can contain authentication material.
+bruno/environments/DEV.bru
+bruno/environments/INT.bru
+
+# Raw reporter JSON contains full claim/member request and response data.
+bruno/results.json
+
+# Python runtime artifacts
+__pycache__/
+*.py[cod]

@@ -1,0 +1,157 @@
+meta {
+  name: Cigna TRUE Apply Pricing
+}
+
+auth {
+  mode: none
+}
+
+script:pre-request {
+  const requestUrl = String(req.getUrl() || "");
+  if (requestUrl.indexOf("/oauth2/") !== -1 && requestUrl.indexOf("/token") !== -1) {
+    return;
+  }
+  
+  function envOrVar(name) {
+    try {
+      return bru.getEnvVar(name) || bru.getVar(name) || "";
+    } catch (e) {
+      return bru.getVar(name) || "";
+    }
+  }
+  
+  function yyyymmdd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + m + day;
+  }
+  
+  // --- Daily dates (auto-rewrite + {{today}} vars) ---
+  // Body editor / .bru file will NOT change. Check Timeline request body or Console.
+  const today = yyyymmdd(new Date());
+  bru.setVar("today", today);
+  bru.setVar("requestDate", today);
+  bru.setVar("serviceFromDate", today);
+  bru.setVar("serviceThruDate", today);
+  try {
+    bru.setEnvVar("today", today);
+  } catch (e) {}
+  
+  let reqBody = null;
+  try {
+    reqBody = req.getBody();
+  } catch (e) {}
+  if (typeof reqBody === "string" && reqBody.trim()) {
+    try {
+      reqBody = JSON.parse(reqBody);
+    } catch (e) {
+      reqBody = null;
+    }
+  }
+  if (!reqBody) {
+    try {
+      const rawBody = req.getBody({ raw: true });
+      if (typeof rawBody === "string" && rawBody.trim()) {
+        reqBody = JSON.parse(rawBody);
+      }
+    } catch (e) {}
+  }
+  
+  if (reqBody && typeof reqBody === "object" && !Array.isArray(reqBody) && reqBody._lockDates !== true) {
+    reqBody.requestDate = today;
+  
+    const claim = reqBody.claimInformation || {};
+    const claimLevel = claim.claimLevel;
+    if (claimLevel && typeof claimLevel === "object") {
+      claimLevel.claimReceiveDate = today;
+    }
+  
+    const lines = claim.serviceLevel;
+    if (Array.isArray(lines)) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line || typeof line !== "object") continue;
+        if (line.lockDates === true) continue;
+        line.serviceFromDate = today;
+        line.serviceThruDate = today;
+      }
+    }
+  
+    delete reqBody._lockDates;
+    if (Array.isArray(lines)) {
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i] && lines[i].lockDates === true) {
+          delete lines[i].lockDates;
+        }
+      }
+    }
+  
+    req.setBody(reqBody);
+    try {
+      req.setHeader("X-Test-Today", today);
+    } catch (e) {}
+    console.log("[Apply Pricing] stamped dates to " + today + " | requestDate=" + reqBody.requestDate);
+  } else {
+    console.log("[Apply Pricing] date stamp skipped. today=" + today + " bodyType=" + typeof reqBody);
+  }
+  
+  // --- Okta token ---
+  const existing = envOrVar("access_token");
+  const expiresAt = Number(envOrVar("token_expires_at") || 0);
+  if (existing && Date.now() < expiresAt - 15000) {
+    bru.setVar("access_token", existing);
+    return;
+  }
+  
+  const tokenUrl = envOrVar("oktaTokenUrl");
+  const basic = envOrVar("oktaBasic");
+  
+  const res = await bru.sendRequest({
+    method: "POST",
+    url: tokenUrl,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Authorization": basic
+    },
+    data: "grant_type=client_credentials&scope=ProclaimAuth"
+  });
+  
+  const raw = res && (res.data !== undefined ? res.data : res.body);
+  const tokenBody = typeof raw === "string" ? JSON.parse(raw) : raw;
+  const token = tokenBody && tokenBody.access_token ? String(tokenBody.access_token) : "";
+  if (!token) {
+    throw new Error("Okta token request did not return access_token. Select environment DEV or INT.");
+  }
+  
+  const ttlMs = ((Number(tokenBody.expires_in) || 3600) - 60) * 1000;
+  const exp = String(Date.now() + ttlMs);
+  bru.setVar("access_token", token);
+  bru.setVar("token_expires_at", exp);
+  try {
+    bru.setEnvVar("access_token", token);
+    bru.setEnvVar("token_expires_at", exp);
+  } catch (e) {}
+}
+
+docs {
+  1. Open THIS collection folder (bruno). Select DEV.
+  2. Dates stamp at SEND time only — Body editor text stays old. That is normal.
+  3. Verify: Timeline request body, header X-Test-Today, or Console log.
+  4. CLI: bru run -r --env DEV --sandbox developer -o results.json
+  5. Opt out: "\_lockDates": true on root, or "lockDates": true on one service line.
+  
+  <br/><br/>
+  
+  Run in Bruno or VS Code terminal to stamp all payload dates to today (YYYYMMDD):
+  
+  <br/>
+  
+  ```
+  cd "C:\Users\c9q4wj\Cigna true apply pricing\bruno"
+  python _stamp_literal_today.py
+  ```
+  
+  Updates: requestDate, claimReceiveDate, serviceFromDate, serviceThruDate, and DEV.bru today=.
+  Pre-request script still overwrites dates at Send time unless lockDates is set.
+}

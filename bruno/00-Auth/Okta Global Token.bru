@@ -1,0 +1,53 @@
+meta {
+  name: Okta Global Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{oktaTokenUrl}}
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+  Authorization: {{oktaBasic}}
+}
+
+body:form-urlencoded {
+  grant_type: client_credentials
+  scope: ProclaimAuth
+}
+
+script:post-response {
+  const body = res.getBody();
+  if (body && body.access_token) {
+    const token = String(body.access_token);
+    const ttlMs = ((Number(body.expires_in) || 3600) - 60) * 1000;
+    const exp = String(Date.now() + ttlMs);
+    bru.setVar("access_token", token);
+    bru.setVar("token_expires_at", exp);
+    try {
+      bru.setEnvVar("access_token", token);
+      bru.setEnvVar("token_expires_at", exp);
+    } catch (e) {}
+  }
+}
+
+tests {
+  test("token issued", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().access_token).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Optional. Collection pre-request already refreshes access_token.
+  Select DEV or INT, then Send. Stores access_token on the environment.
+}

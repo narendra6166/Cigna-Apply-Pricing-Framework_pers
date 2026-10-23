@@ -1,0 +1,291 @@
+meta {
+  name: AP-ASC-9999 Sc9 ASC multi-line stop-loss
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/costshare
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: {{access_token}}
+}
+
+body:json {
+  {
+    "serviceReferenceId": "202628604315464_0432628615464",
+    "serviceName": "PCLM - CIGNA True Benefit details",
+    "sourceSystem": "CIGNA-TRUE",
+    "claimEngineId": "PCLM",
+    "requestDate": "20261022",
+    "memberInformation": {
+      "employeeSsn": "922070569",
+      "subscriberPid": "363644027169605",
+      "patientPid": "363644027169605",
+      "cedRelationship": "E",
+      "patientSuffix": "01",
+      "patientDob": "19710117",
+      "memberNetwork": "OA128"
+    },
+    "planInformation": {
+      "soc": "43580",
+      "clientId": "9507818",
+      "accountNumber": "2210023",
+      "branch": "0001",
+      "benopt": "OAP1R",
+      "planSchedule": "ASCOP"
+    },
+    "providers": {
+      "providerTin": "202508426",
+      "tinTypeCode": "EIN",
+      "renderingCpfId": "1479958",
+      "renderingCpfAddressSequence": "0001",
+      "billingCpfId": "1479958",
+      "billingCpfAddressSequence": "0001",
+      "npi": "",
+      "renderingProviderSpecialty": "AAM",
+      "renderingProviderType": "65",
+      "network": "INN",
+      "zipCode": "303541991",
+      "stateSurcharge": "",
+      "authorizeInd": ""
+    },
+    "claimInformation": {
+      "claimLevel": {
+        "claimCcrKey": "202628604315464_0432628615464",
+        "claimReceiveDate": "20261022",
+        "claimPrimaryDiagnosisCode": "A021",
+        "formType": "HCFA",
+        "claimAdmissionType": "",
+        "claimEmergencyIndicator": "N",
+        "medicalManagementOption": " ",
+        "fundingArrangementType": " ",
+        "cobType": " ",
+        "admissionType": " ",
+        "billType": "1",
+        "contractStatus": 0,
+        "ecnId": "",
+        "claimIcdVersion": "10",
+        "pricingDetails": {
+          "usedDrgCode": "",
+          "groupVersion": "0",
+          "groupMethod": "02",
+          "pricerType": "64",
+          "pricingStatus": 200,
+          "allowedCharges": 115.71,
+          "allowedExcessCharges": "",
+          "savings": 0,
+          "ppoDiscReason": 0,
+          "ovragCfg": "N",
+          "pricingError": [],
+          "pricingRules": [
+            {
+              "pdBasedonCd": [{"pdBasedonCode": ""}],
+              "pdRateTypeCd": [
+                {"pdRateTypeCode": "PERCENT"},
+                {"pdRateTypeCode": "DISCOUNT"}
+              ],
+              "pdUsage": "A",
+              "pdLineNum": 1,
+              "pdOriginalLineNum": 1
+            },
+            {
+              "pdBasedonCd": [{"pdBasedonCode": ""}],
+              "pdRateTypeCd": [{"pdRateTypeCode": "P09"}],
+              "pdUsage": "A",
+              "pdLineNum": 2,
+              "pdOriginalLineNum": 2
+            },
+            {
+              "pdBasedonCd": [{"pdBasedonCode": ""}],
+              "pdRateTypeCd": [{"pdRateTypeCode": "P09"}],
+              "pdUsage": "A",
+              "pdLineNum": 3,
+              "pdOriginalLineNum": 3
+            },
+            {
+              "pdBasedonCd": [{"pdBasedonCode": "S"}],
+              "pdRateTypeCd": [{"pdRateTypeCode": ""}],
+              "pdUsage": "A",
+              "pdLineNum": 9999,
+              "pdOriginalLineNum": 1
+            }
+          ]
+        }
+      },
+      "serviceLevel": [
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "C1781",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00300",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 231.41,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0001",
+          "pricingArea": {
+            "pdLineNum": 1,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 115.71,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 231.41,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "GA304",
+            "claimEngineNetworkId": "10002018",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        },
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "L8699",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00941",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 4411.75,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0002",
+          "pricingArea": {
+            "pdLineNum": 2,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 4411.75,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "GA304",
+            "claimEngineNetworkId": "10002018",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        },
+        {
+          "serviceFromDate": "20261022",
+          "serviceThruDate": "20261022",
+          "procedureCode": "47001",
+          "procedureCodeType": "CPT",
+          "revenueCode": "00360",
+          "unitCount": "1",
+          "surgeryTransplnt": "N",
+          "unitType": "",
+          "chargeAmt": 4300.0,
+          "diagnosisCode": "A021",
+          "modifier1": "",
+          "modifier2": "",
+          "modifier3": "",
+          "modifier4": "",
+          "placeOfService": "11",
+          "pathwellSpecialityCode": "N",
+          "enhancementCode": "",
+          "lineNum": "0003",
+          "pricingArea": {
+            "pdLineNum": 3,
+            "pdPtr": 1,
+            "pdRatesheetID": "CRAV0874",
+            "pdAllowed": 0.0,
+            "clExcluded": "FALSE",
+            "override": "N",
+            "pdGroupCharge": 4300.0,
+            "pdMaxUnits": 0.0,
+            "pdApcNum": 0
+          },
+          "networkArea": {
+            "ratesheet": "",
+            "providerNetworkIndicator": "O",
+            "networkId": "GA304",
+            "claimEngineNetworkId": "10002018",
+            "pcpIndicator": "N",
+            "ccnIndicator": "N",
+            "mmmIndicator": "2",
+            "csnIndicator": "",
+            "contractedProvider": "",
+            "networkEffectiveDate": "20250101",
+            "networkCancelDate": "99999999",
+            "networkFeeArea": [
+              {
+                "networkReimbersmentLineEffectiveDate": "20250101",
+                "networkReimbersmentLineCancelDate": "99999999",
+                "networkReimbersmentLineType": "",
+                "networkReimbersmentLineAttributeValue": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+tests {
+  test("HTTP accepted", function () {
+    expect([200, 202, 207]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  Mainframe export sync: source=AP-ASC-9999-TEST DATA FROM MAINFRAME.yaml; doc=202628604315464; key=202628604315464_0432628615464; serviceLines=updated 1; diagnosis=updated.
+  ASCOP/GATES MF AP-ASC-9999: doc 202628604315464_0432628615464 DX R0602; lines=1; allowedCharges=186.5; pricingStatus 200; pricerType 64; ovragCfg N.
+}
