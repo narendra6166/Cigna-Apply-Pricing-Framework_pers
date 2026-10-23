@@ -29,7 +29,18 @@ Open **Terminal → New Terminal**. The terminal should start in this framework 
 .\bruno\run_all_tests.ps1
 ```
 
-This makes live API calls. Bruno CLI (`bru`) and Python must be available on PATH. Reports are written under `bruno\`: `TEST-RESULTS.xlsx`, `TEST-RESULTS.docx`, `TEST-RESULTS.csv`, `EXECUTION-REPORT.md`, and `TEST-RESULTS.md`. Each successful report run updates these same files using the latest results. Close the Excel and Word reports before running; if a report is open and locked, the runner reports the error instead of silently leaving it stale.
+The runner runs all payloads directly with no prompt: it refreshes request dates, runs the collection, and generates the reports.
+
+To update ONE payload from `DATA-FROM -MAINFRAME` (never runs the collection), pick or enter a payload name or scenario ID:
+
+```powershell
+.\bruno\update_payload.ps1
+.\bruno\update_payload.ps1 -Payload "AP-013"
+```
+
+The updater keeps field names and object shape, and rebuilds `serviceLevel` and `pricingRules` to one entry per distinct source service line. If several source files match, choose one when prompted. Direct equivalent: `python .\bruno\update_payload_from_mainframe.py --payload "AP-013"`.
+
+The selected source export can contain member and claim information. Keep it local and private; do not commit or share updated payloads containing real member data. The runner makes live API calls. Bruno CLI (`bru`) and Python must be available on PATH. Reports are written under `bruno\`: `TEST-RESULTS.xlsx`, `TEST-RESULTS.docx`, `TEST-RESULTS.csv`, `EXECUTION-REPORT.md`, and `TEST-RESULTS.md`. Each successful report run updates these same files using the latest results. Close the Excel and Word reports before running; if a report is open and locked, the runner reports the error instead of silently leaving it stale.
 
 ## Run requests from Bruno Desktop
 

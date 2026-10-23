@@ -9,11 +9,191 @@ from xml.etree import ElementTree
 from zipfile import ZipFile
 
 import apply_pricing_framework.__main__ as framework_cli
+from bruno.update_payload_from_mainframe import parse_export, update_payload
 from apply_pricing_framework.engine import CatalogError, evaluate, load_catalog, run_catalog
 from apply_pricing_framework.report import write_csv, write_excel, write_markdown, write_word
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT / "apply_pricing_framework" / "rules" / "expected-results.json"
+
+
+class MainframePayloadSyncTests(unittest.TestCase):
+    def test_parses_source_with_missing_array_terminator(self) -> None:
+        from bruno.update_payload_from_mainframe import parse_export
+
+        with tempfile.TemporaryDirectory() as directory:
+            source_path = Path(directory) / "source.yaml"
+            source_path.write_text(
+                '{"query": [{"value": 1}\n# next query\n{"next": [{"ok": true}]}',
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                parse_export(source_path),
+                [{"query": [{"value": 1}]}, {"next": [{"ok": True}]}],
+            )
+
+    def test_updates_matching_request_fields_from_concatenated_export_blocks(self) -> None:
+        source = """# Header extract
+{"header query": [{
+  "P20_GCDOC_NO": 12345,
+  "REQUESTDATE": 20260618,
+  "EMPLOYEESSN": 111222333,
+  "PATIENTSUFFIX": 3,
+  "PATIENTDOB": 20010102,
+  "SOC": 1234,
+  "CLIENTID": 5678,
+  "ACCOUNTNUMBER": 9012,
+  "BENOPT": "OAP",
+  "SCHEDULEATTR": "APCOP",
+  "PRICINGTYPE": "APC",
+  "DRGVERSION": 26,
+  "USEDDRG": "    ",
+  "ALLOW_CHG": 25.5,
+  "GRP_CHG": 30.0,
+  "USAGE": "A ",
+  "RATETYPE": "LN-DENIED-015,P10",
+  "BASED_ON": "SI-N,AP",
+  "APC_NUM": "5023"
+}]}
+# Service extract
+{"service query": [{
+  "SERVICEFROMDATE": 20260618,
+  "SERVICETHRUDATE": 20260618,
+  "PROCEDURECODE": "87086",
+  "REVENUECODE": -403,
+  "CHARGEAMT": 30.0,
+  "MODIFIER1": null
+}]}
+"""
+        request = {
+            "serviceReferenceId": "AP-001_111_2",
+            "requestDate": "20260101",
+            "memberInformation": {
+                "employeeSsn": "",
+                "patientSuffix": "",
+            },
+            "planInformation": {"soc": ""},
+            "providers": {},
+            "claimInformation": {
+                "claimLevel": {
+                    "claimCcrKey": "111_2",
+                    "claimReceiveDate": "20260101",
+                    "pricingDetails": {
+                        "allowedCharges": 0,
+                        "pricingRules": [{
+                            "pdBasedonCd": [{"pdBasedonCode": ""}, {"pdBasedonCode": ""}],
+                            "pdRateTypeCd": [{"pdRateTypeCode": ""}],
+                            "pdUsage": "",
+                            "pdLineNum": 1,
+                            "pdOriginalLineNum": 1,
+                        }],
+                    },
+                },
+                "serviceLevel": [{
+                    "serviceFromDate": "20260101",
+                    "serviceThruDate": "20260101",
+                    "procedureCode": "00000",
+                    "revenueCode": "00000",
+                    "chargeAmt": 0,
+                    "modifier1": "OLD",
+                    "pricingArea": {
+                        "pdAllowed": 0,
+                        "pdGroupCharge": 0,
+                        "pdMaxUnits": 0,
+                        "pdApcNum": 0,
+                    },
+                    "networkArea": {},
+                }],
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            source_path = Path(directory) / "source.yaml"
+            payload_path = Path(directory) / "request.bru"
+            source_path.write_text(source, encoding="utf-8")
+            original_root_fields = set(request)
+            original_line_fields = set(request["claimInformation"]["serviceLevel"][0])
+            payload_path.write_text(
+                "meta {\n  name: AP-001 example\n}\nbody:json {\n  "
+                + json.dumps(request)
+                + "\n}\n",
+                encoding="utf-8",
+            )
+
+            blocks = parse_export(source_path)
+            lines_updated, source_lines = update_payload(payload_path, source_path)
+            body_text = payload_path.read_text(encoding="utf-8")
+            body_start = body_text.index("body:json {") + len("body:json {")
+            body_start = body_text.index("{", body_start)
+            body_end = body_text.rindex("}")
+            updated = json.loads(body_text[body_start:body_end].strip())
+
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual((lines_updated, source_lines), (1, 1))
+        self.assertEqual(set(updated), original_root_fields)
+        self.assertEqual(updated["memberInformation"]["employeeSsn"], "111222333")
+        self.assertEqual(updated["memberInformation"]["patientSuffix"], "03")
+        self.assertEqual(updated["claimInformation"]["claimLevel"]["claimCcrKey"], "12345_2")
+        line = updated["claimInformation"]["serviceLevel"][0]
+        self.assertEqual(set(line), original_line_fields)
+        self.assertEqual(line["procedureCode"], "87086")
+        self.assertEqual(line["revenueCode"], "00403")
+        self.assertEqual(line["modifier1"], "")
+        self.assertEqual(line["pricingArea"]["pdAllowed"], 25.5)
+        self.assertEqual(
+            updated["claimInformation"]["claimLevel"]["pricingDetails"]["pricingRules"][0]
+            ["pdBasedonCd"],
+            [{"pdBasedonCode": "SI-N"}, {"pdBasedonCode": "AP"}],
+        )
+
+    def test_rebuilds_service_lines_and_rules_to_match_source_count(self) -> None:
+        source_rows = [{
+            "P20_GCDOC_NO": 12345,
+            "EMPLOYEESSN": 111222333,
+        }, {
+            "PROCEDURECODE": "87086",
+        }, {
+            "PROCEDURECODE": "80050",
+            "CHARGEAMT": 20,
+        }]
+        from bruno.update_payload_from_mainframe import update_request
+
+        request = {
+            "memberInformation": {},
+            "planInformation": {},
+            "providers": {},
+            "claimInformation": {
+                "claimLevel": {
+                    "pricingDetails": {
+                        "pricingRules": [{
+                            "pdBasedonCd": [{"pdBasedonCode": ""}],
+                            "pdRateTypeCd": [{"pdRateTypeCode": ""}],
+                            "pdUsage": "",
+                            "pdLineNum": 1,
+                            "pdOriginalLineNum": 1,
+                        }],
+                    },
+                },
+                "serviceLevel": [{
+                    "procedureCode": "old",
+                    "lineNum": "0001",
+                    "pricingArea": {"pdLineNum": 1},
+                    "networkArea": {},
+                }],
+            },
+        }
+        update_request(request, [{"query": source_rows}])
+        self.assertEqual(
+            [line["procedureCode"] for line in request["claimInformation"]["serviceLevel"]],
+            ["87086", "80050"],
+        )
+        rules = request["claimInformation"]["claimLevel"]["pricingDetails"]["pricingRules"]
+        self.assertEqual(len(rules), 2)
+        self.assertEqual([rule["pdLineNum"] for rule in rules], [1, 2])
+        self.assertEqual(set(rules[0]), set(rules[1]))
+        self.assertEqual(
+            set(request["claimInformation"]["serviceLevel"][1]),
+            set(request["claimInformation"]["serviceLevel"][0]),
+        )
 
 
 class CatalogTests(unittest.TestCase):

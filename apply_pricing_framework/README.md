@@ -21,6 +21,8 @@ Open the project root in VS Code and use its PowerShell terminal. To run Bruno's
 .\bruno\run_all_tests.ps1
 ```
 
+The runner runs all payloads with no prompt. To refresh one payload from `DATA-FROM -MAINFRAME` without running the collection, use `.\bruno\update_payload.ps1` (prompts for a name) or `python .\bruno\update_payload_from_mainframe.py --payload "AP-013"`. Service-line and pricing-rule arrays are resized to the source detail count while retaining existing fields and structure.
+
 The runner uses `bruno\environments\DEV.bru`, stores Bruno's reporter output in `bruno\results.json`, and writes:
 
 - `bruno\TEST-RESULTS.xlsx`
@@ -127,4 +129,4 @@ Excel includes Summary, Scenario Results, Unmapped Payloads, and Design Decision
 
 The October 16 scenario document is the requested scenario inventory, but it does not fully specify expected results for every case. The catalog therefore ties each executable check to that document, the retained pricing PDF, and Kishore's detailed scenario guide as applicable. AP-SC18 remains design-pending, and OTROP-634 remains Not Run until its missing payload is added. Any rule not determined by those sources stays conditional or blocked; see `design/TRACEABILITY.md` for the comparison and conflicts.
 
-The neighboring pytest-BDD project remains separate and unchanged. The existing mainframe payload synchronizer is also separate: it updates mapped request fixtures from extracted source data; it is not the expected-result engine.
+The neighboring pytest-BDD project remains separate and unchanged. `bruno\update_payload_from_mainframe.py` updates a selected request fixture from its extracted mainframe source; it is separate from the expected-result engine.
